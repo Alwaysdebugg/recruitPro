@@ -57,27 +57,30 @@ const Dashboard: React.FC = () => {
     const fetchCandidateList = async () => {
       const data = await getCandidateList();
       setCandidateList(data.candidates);
+      console.log("candidateList",data.candidates);
     };
     fetchCandidateList();
 
     // 获取已录用的候选人
     const fetchHiredCandidates = async () => {
       const data = await getHiredCandidates();
-      setHiredCandidates(data);
+      setHiredCandidates(data.candidates);
     };
     fetchHiredCandidates();
 
-    // 获取活跃面试列表
+    // 获取schedule面试列表
     const fetchActiveInterviews = async () => {
       const data = await getActiveInterviews();
-      setActiveInterviews(data);
+      setActiveInterviews(data.interviews);
+      console.log("activeInterviews",data);
     };
     fetchActiveInterviews();
 
     // 获取招聘进度中的候选人列表
     const fetchCandidatesInProgress = async () => {
       const data = await getCandidatesInProgress();
-      setCandidatesInProgress(data);
+      console.log("candidatesInProgress",data);
+      setCandidatesInProgress(data.candidates);
     };
     fetchCandidatesInProgress();
   }, []);
