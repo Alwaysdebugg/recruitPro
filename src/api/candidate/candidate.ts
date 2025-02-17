@@ -1,37 +1,14 @@
 import axios from 'axios';
+import { Interview, Candidate } from '../../types';
 
 interface CandidateResponse {
   candidates: Candidate[];
   totalItems: number;
 }
 
-interface Candidate {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  position: string;
-  status: string;
-  experience: string;
-  skills: string[];
-  resumeUrl: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
 interface InterviewResponse {
   interviews: Interview[];
   totalItems: number;
-}
-
-interface Interview {
-  id: number;
-  candidateId: number;
-  interviewerId: number;
-  scheduleTime: string;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 const API_URL = 'http://localhost:3000/candidate';
@@ -58,6 +35,13 @@ export const getCandidatesInProgress = async () => {
   const response = await axios.get<CandidateResponse>(`${API_URL}/candidates/in-progress`);
   return response.data;
 };
+
+// 添加候选人
+export const addCandidate = async (candidate: Candidate) => {
+  const response = await axios.post(`${API_URL}/candidates`, candidate);
+  return response.data;
+};
+
 
 
 

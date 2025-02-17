@@ -3,29 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import ReactECharts from 'echarts-for-react';
 import { Users, Calendar, FileText, PieChart } from 'lucide-react';
 import { DashboardStats } from '../types';
-import { getCandidateList, getHiredCandidates, getActiveInterviews, getCandidatesInProgress } from '../api/candidate/candidateList';
+import { getCandidateList, getHiredCandidates, getActiveInterviews, getCandidatesInProgress } from '../api/candidate/candidate';
 import { useState, useEffect } from 'react';
-
+import { Interview } from '../types';
 interface Candidate {
   id: number;
   name: string;
   email: string;
-  phone: string;
-  position: string;
+  appliedRole: string;
   status: string;
   experience: string;
-  skills: string[];
   resumeUrl: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface Interview {
-  id: number;
-  candidateId: number;
-  interviewerId: number;
-  scheduleTime: string;
-  status: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -57,7 +45,7 @@ const Dashboard: React.FC = () => {
     const fetchCandidateList = async () => {
       const data = await getCandidateList();
       setCandidateList(data.candidates);
-      console.log("candidateList",data.candidates);
+      // console.log("candidateList",data.candidates);
     };
     fetchCandidateList();
 
@@ -72,14 +60,14 @@ const Dashboard: React.FC = () => {
     const fetchActiveInterviews = async () => {
       const data = await getActiveInterviews();
       setActiveInterviews(data.interviews);
-      console.log("activeInterviews",data);
+      // console.log("activeInterviews",data);
     };
     fetchActiveInterviews();
 
     // 获取招聘进度中的候选人列表
     const fetchCandidatesInProgress = async () => {
       const data = await getCandidatesInProgress();
-      console.log("candidatesInProgress",data);
+      // console.log("candidatesInProgress",data);
       setCandidatesInProgress(data.candidates);
     };
     fetchCandidatesInProgress();

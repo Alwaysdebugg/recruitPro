@@ -1,23 +1,25 @@
 export interface Candidate {
-  id: string;
+  id: number;
   name: string;
   email: string;
-  role: string;
-  status: 'new' | 'screening' | 'interview' | 'offer' | 'hired' | 'rejected';
-  matchScore: number;
+  appliedRole: string;
+  status: string;
+  experience: string;
   resumeUrl: string;
-  appliedDate: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Interview {
-  id: string;
-  candidateId: string;
+  id: number;
+  candidateId: number;
   candidateName: string;
-  date: string;
-  time: string;
-  interviewers: string[];
+  scheduledTime: string;
+  interviewer: string;
   status: 'scheduled' | 'completed' | 'cancelled';
-  type: 'technical' | 'behavioral' | 'final';
+  type: 'technical' | 'behavioral' | 'final' | 'screening';
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface DashboardStats {

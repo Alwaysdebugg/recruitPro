@@ -1,36 +1,38 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar } from 'lucide-react';
 import { Interview } from '../types';
-
-const mockInterviews: Interview[] = [
-  {
-    id: '1',
-    candidateId: '1',
-    candidateName: 'Sarah Johnson',
-    date: '2024-03-15',
-    time: '10:00',
-    interviewers: ['John Smith', 'Emma Wilson'],
-    status: 'scheduled',
-    type: 'technical'
-  },
-  {
-    id: '2',
-    candidateId: '2',
-    candidateName: 'Michael Chen',
-    date: '2024-03-16',
-    time: '14:00',
-    interviewers: ['David Brown', 'Lisa Anderson'],
-    status: 'scheduled',
-    type: 'behavioral'
-  }
-];
+import { getActiveInterviews } from '../api/candidate/candidate';
 
 const ActiveInterviews: React.FC = () => {
   const navigate = useNavigate();
+  const [activeInterviews, setActiveInterviews] = useState<Interview[]>([]);
+  const [loading, setLoading] = useState(true);
+  // 获取schedule面试列表
+  useEffect(() => {
+    const fetchActiveInterviews = async () => {
+      try {
+        setLoading(true);
+        const data = await getActiveInterviews();
+        setActiveInterviews(data.interviews);
+        console.log("activeInterviews",data.interviews);
+      } catch (error) {
+        console.error('Error fetching active interviews:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchActiveInterviews();
+  }, []);
 
   return (
     <div className="p-6 bg-gray-50">
+      {loading ? (
+        <div className="flex justify-center items-center h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
+        </div>
+      ) : (
+        <>
       <div className="flex items-center mb-8">
         <button
           onClick={() => navigate('/')}
@@ -42,7 +44,7 @@ const ActiveInterviews: React.FC = () => {
       </div>
 
       <div className="grid gap-6">
-        {mockInterviews.map((interview) => (
+        {activeInterviews.map((interview) => (
           <div key={interview.id} className="bg-white rounded-xl shadow-sm p-6">
             <div className="flex items-start justify-between">
               <div>
@@ -51,16 +53,19 @@ const ActiveInterviews: React.FC = () => {
                 </h3>
                 <div className="flex items-center text-sm text-gray-500 mb-4">
                   <Calendar className="w-4 h-4 mr-1" />
-                  {new Date(interview.date).toLocaleDateString()} at {interview.time}
+                  {new Date(interview.scheduledTime).toLocaleDateString()} at 
+                  {new Date(interview.scheduledTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
                 </div>
                 <div className="space-y-2">
                   <p className="text-sm text-gray-600">
                     <span className="font-medium">Type:</span>{' '}
-                    {interview.type.charAt(0).toUpperCase() + interview.type.slice(1)}
+                      <span className="text-xs bg-purple-300 text-gray-900 px-2 py-1 rounded-md">
+                      {interview.type.charAt(0).toUpperCase() + interview.type.slice(1)}
+                      </span>
                   </p>
                   <p className="text-sm text-gray-600">
                     <span className="font-medium">Interviewers:</span>{' '}
-                    {interview.interviewers.join(', ')}
+                    <span className='font-bold'>{interview.interviewer}</span>
                   </p>
                 </div>
               </div>
@@ -71,6 +76,8 @@ const ActiveInterviews: React.FC = () => {
           </div>
         ))}
       </div>
+      </>
+      )}
     </div>
   );
 };

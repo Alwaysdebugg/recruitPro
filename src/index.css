@@ -1,3 +1,12 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@font-face {
+    font-family: 'Roboto';
+    src: url('@fontsource/roboto/300.css');
+    src: url('@fontsource/roboto/400.css');
+    src: url('@fontsource/roboto/500.css');
+    src: url('@fontsource/roboto/700.css');
+}
+
