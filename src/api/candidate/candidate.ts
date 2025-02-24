@@ -42,6 +42,13 @@ export const addCandidate = async (candidate: Candidate) => {
   return response.data;
 };
 
+// 编辑候选人
+export const editCandidate = async (candidate: Candidate) => {
+  const response = await axios.put(`${API_URL}/candidates/${candidate.id}`, candidate);
+  return response.data;
+};
+
+
 
 
 

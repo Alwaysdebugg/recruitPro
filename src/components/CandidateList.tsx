@@ -3,7 +3,11 @@ import { format } from 'date-fns';
 import { FileText, Calendar, Star, X } from 'lucide-react';
 import { Candidate } from '../types';
 import ScheduleInterviewDrawer from './ScheduleInterviewDrawer';
-import { addCandidate, getCandidateList } from '../api/candidate/candidate';
+import { addCandidate, editCandidate, getCandidateList } from '../api/candidate/candidate';
+import EditNoteOutlinedIcon from '@mui/icons-material/EditNoteOutlined';
+import OpenForm from './openForm';
+import AddIcon from '@mui/icons-material/Add';
+import { Tab, Tabs, Box } from '@mui/material';
 
 const statusColors: { [key: string]: string } = {
   NEW: 'bg-blue-100 text-blue-800',
@@ -11,11 +15,21 @@ const statusColors: { [key: string]: string } = {
   INTERVIEW: 'bg-purple-100 text-purple-800',
   OFFER: 'bg-green-100 text-green-800',
   HIRED: 'bg-emerald-100 text-emerald-800',
-  REJECTED: 'bg-red-100 text-red-800'
+  REJECTED: 'bg-red-100 text-red-800',
+  SCREENING: 'bg-orange-100 text-orange-800'
 };
 
+function a11yProps(index: number) {
+  return {
+    id: `simple-tab-${index}`,
+    'aria-controls': `simple-tabpanel-${index}`,
+  };
+}
+
 const CandidateList: React.FC = () => {
+  const [value, setValue] = useState(0);
   const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
+  const [isOpenEditForm, setIsOpenEditForm] = useState(false);
   const [isScheduleDrawerOpen, setIsScheduleDrawerOpen] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   const [formData, setFormData] = useState({
@@ -29,13 +43,12 @@ const CandidateList: React.FC = () => {
   const [candidatesList, setCandidatesList] = useState<Candidate[]>([]);
   // 获取候选人列表
   useEffect(() => {
-    const fetchCandidates = async () => {
-      const data = await getCandidateList();
-      console.log("candidatesListcomponent",data);
-      setCandidatesList(data.candidates);
-    };
-    fetchCandidates();
+    getList();
   }, []);
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
+  };
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -45,10 +58,9 @@ const CandidateList: React.FC = () => {
     }));
   };
 
+  // 添加候选人
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // 添加候选人
     const candidate: Candidate = {
       name: formData.name,
       email: formData.email,
@@ -65,8 +77,7 @@ const CandidateList: React.FC = () => {
       console.log('添加候选人', data);
 
       // 刷新候选人列表
-      const updatedData = await getCandidateList();
-      setCandidatesList(updatedData.candidates);
+      getList();
     } catch (error) {
       console.error('error', error);
     }
@@ -79,18 +90,52 @@ const CandidateList: React.FC = () => {
     setIsScheduleDrawerOpen(true);
   };
 
+  // openForm 编辑候选人信息
+  const handleEditCandidate = async (candidate: Candidate) => {
+    setSelectedCandidate(candidate);
+    setIsOpenEditForm(true);
+  };
+
+  // 更新候选人信息
+  const handleUpdateCandidate = async (candidate: Candidate) => {
+    const data = await editCandidate(candidate);
+    console.log('更新候选人', data);
+    getList();
+  };
+ 
+  // 获取候选人列表
+  const getList = async () => {
+    const data = await getCandidateList();
+    setCandidatesList(data.candidates);
+  };
+
   return (
     <div className="p-6 bg-gray-50">
-      <div className="flex items-center gap-2 mb-6">
+      <div className="flex flex-row justify-between items-center gap-4 mb-4">
+      <div className="flex items-center gap-2">
         <h2 className="text-2xl font-bold text-gray-900">Candidates</h2>
         <button 
           onClick={() => setIsAddDrawerOpen(true)}
           className="h-6 w-6 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
         >
-         +
+          <AddIcon />
         </button>
       </div>
 
+      {/* tab分类栏 */}
+      <Box>
+        <Tabs value={value} onChange={handleTabChange} textColor="primary" aria-label="candidate status">
+          <Tab label="All" {...a11yProps(0)} />
+          <Tab label="New" {...a11yProps(1)} />
+          <Tab label="Interview" {...a11yProps(2)} />
+          <Tab label="Offer" {...a11yProps(3)} />
+          <Tab label="Hired" {...a11yProps(4)} />
+          <Tab label="Rejected" {...a11yProps(5)} />
+          <Tab label="Screening" {...a11yProps(6)} />
+          <Tab label="In Progress" {...a11yProps(7)} />
+        </Tabs>
+      </Box>
+      </div>
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <div className="grid grid-cols-1 gap-4 sm:gap-6 p-6">
           {candidatesList.map((candidate) => (
@@ -98,6 +143,9 @@ const CandidateList: React.FC = () => {
               <div className="flex-1">
                 <div className="flex items-center mb-2">
                   <h3 className="text-lg font-semibold text-gray-900">{candidate.name}</h3>
+                  <button className="ml-2 hover:text-gray-500 cursor-pointer" onClick={() => handleEditCandidate(candidate)}>
+                    <EditNoteOutlinedIcon className="w-4 h-4" />
+                  </button>
                   <span className={`ml-3 px-3 py-1 rounded-full text-xs font-medium ${statusColors[candidate.status]}`}>
                     {candidate.status}
                   </span>
@@ -238,6 +286,14 @@ const CandidateList: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {/* 更新候选人信息 */}
+      <OpenForm
+        isOpen={isOpenEditForm}
+        onClose={() => setIsOpenEditForm(false)}
+        onSubmit={(candidate: Candidate) => {handleUpdateCandidate(candidate)}}
+        candidate={selectedCandidate || undefined}
+      />
 
       {/* Schedule Interview Drawer */}
       {selectedCandidate && (
