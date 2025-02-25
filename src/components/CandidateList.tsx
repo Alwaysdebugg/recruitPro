@@ -41,10 +41,37 @@ const CandidateList: React.FC = () => {
   });
 
   const [candidatesList, setCandidatesList] = useState<Candidate[]>([]);
+  const [filteredCandidates, setFilteredCandidates] = useState<Candidate[]>([]);
+  
   // 获取候选人列表
   useEffect(() => {
     getList();
   }, []);
+  
+  // 根据选中的 tab 过滤候选人
+  useEffect(() => {
+    if (value === 0) {
+      // "All" tab
+      setFilteredCandidates(candidatesList);
+    } else {
+      // tab 分类
+      const statusMap: { [key: number]: string } = {
+        1: 'NEW',
+        2: 'INTERVIEW',
+        3: 'OFFER',
+        4: 'HIRED',
+        5: 'REJECTED',
+        6: 'SCREENING',
+        7: 'IN_PROGRESS'
+      };
+      
+      const selectedStatus = statusMap[value];
+      const filtered = candidatesList.filter(
+        candidate => candidate.status === selectedStatus
+      );
+      setFilteredCandidates(filtered);
+    }
+  }, [value, candidatesList]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -136,9 +163,9 @@ const CandidateList: React.FC = () => {
         </Tabs>
       </Box>
       </div>
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden min-h-[calc(100vh-10rem)]">
         <div className="grid grid-cols-1 gap-4 sm:gap-6 p-6">
-          {candidatesList.map((candidate) => (
+          {filteredCandidates.map((candidate) => (
             <div key={candidate.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg hover:shadow-md transition-shadow">
               <div className="flex-1">
                 <div className="flex items-center mb-2">
@@ -290,7 +317,10 @@ const CandidateList: React.FC = () => {
       {/* 更新候选人信息 */}
       <OpenForm
         isOpen={isOpenEditForm}
-        onClose={() => setIsOpenEditForm(false)}
+        onClose={() => {
+          setIsOpenEditForm(false)
+          setSelectedCandidate(null)
+        }}
         onSubmit={(candidate: Candidate) => {handleUpdateCandidate(candidate)}}
         candidate={selectedCandidate || undefined}
       />
@@ -308,12 +338,13 @@ const CandidateList: React.FC = () => {
       )}
 
       {/* Overlay */}
-      {(isAddDrawerOpen || isScheduleDrawerOpen) && (
+      {(isAddDrawerOpen || isScheduleDrawerOpen || isOpenEditForm) && (
         <div 
           className="fixed inset-0 bg-black bg-opacity-50 transition-opacity z-20"
           onClick={() => {
             setIsAddDrawerOpen(false);
             setIsScheduleDrawerOpen(false);
+            setIsOpenEditForm(false);
             setSelectedCandidate(null);
           }}
         />
