@@ -2,10 +2,10 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReactECharts from 'echarts-for-react';
 import { Users, Calendar, FileText, PieChart } from 'lucide-react';
-import { DashboardStats } from '../types';
-import { getCandidateList, getHiredCandidates, getActiveInterviews, getCandidatesInProgress } from '../api/candidate/candidate';
+import { DashboardStats } from '../../types';
+import { getCandidateList, getHiredCandidates, getActiveInterviews, getCandidatesInProgress } from '../../api/candidate/candidate';
 import { useState, useEffect } from 'react';
-import { Interview } from '../types';
+import { Interview } from '../../types';
 interface Candidate {
   id: number;
   name: string;

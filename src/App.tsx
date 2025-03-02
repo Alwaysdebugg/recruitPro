@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Dashboard from './pages/Dashboard';
-import CandidateList from './components/CandidateList';
+import Dashboard from './pages/Dashboard/Dashboard';
+import CandidateList from './pages/Dashboard/CandidateList';
 import ActiveInterviews from './pages/ActiveInterviews';
 import HiringProgress from './pages/HiringProgress';
 import HiredCandidates from './pages/HiredCandidates';

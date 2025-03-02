@@ -1,7 +1,7 @@
 // 更新候选人信息
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { Candidate } from '../types';
+import { Candidate } from '../../types';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
@@ -76,7 +76,7 @@ const OpenForm: React.FC<OpenFormProps> = ({ isOpen, onClose, onSubmit, candidat
   };
 
   return (
-    <div className={`fixed inset-y-0 right-0 w-96 bg-white shadow-lg transform ${isOpen ? 'translate-x-0' : 'translate-x-full'} transition-transform duration-300 ease-in-out z-30`}>
+    <div className={`fixed inset-y-0 right-0 w-96 bg-white shadow-lg transform ${isOpen ? 'translate-x-0' : 'translate-x-full'} transition-transform duration-300 ease-in-out z-30`} style={{borderRadius: '10px'}}>
       <div className="h-full flex flex-col">
         <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
           <h3 className="text-lg font-semibold text-gray-900">Edit Candidate</h3>

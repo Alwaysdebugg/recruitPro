@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { FileText, Calendar, Star, X, Search } from 'lucide-react';
-import { Candidate } from '../types';
+import { Candidate } from '../../types';
 import ScheduleInterviewDrawer from './ScheduleInterviewDrawer';
-import { addCandidate, editCandidate, getCandidateList } from '../api/candidate/candidate';
+import { addCandidate, editCandidate, getCandidateList } from '../../api/candidate/candidate';
 import EditNoteOutlinedIcon from '@mui/icons-material/EditNoteOutlined';
 import OpenForm from './openForm';
 import AddIcon from '@mui/icons-material/Add';
 import { Tab, Tabs, Input } from '@mui/material';
-
+import AddForm from './addForm';
 const statusColors: { [key: string]: string } = {
   NEW: 'bg-blue-100 text-blue-800',
   IN_PROGRESS: 'bg-yellow-100 text-yellow-800',
@@ -34,14 +34,6 @@ const CandidateList: React.FC = () => {
   const [isScheduleDrawerOpen, setIsScheduleDrawerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    appliedRole: '',
-    resumeUrl: '',
-    experience: ''
-  });
-
   const [candidatesList, setCandidatesList] = useState<Candidate[]>([]);
   const [filteredCandidates, setFilteredCandidates] = useState<Candidate[]>([]);
   
@@ -86,6 +78,7 @@ const CandidateList: React.FC = () => {
       // 同时满足状态和搜索条件
       return statusMatch && searchMatch;
     });
+    console.log('filtered', filtered);
     
     setFilteredCandidates(filtered);
   }, [tabValue, searchQuery, candidatesList]);
@@ -94,28 +87,9 @@ const CandidateList: React.FC = () => {
     setTabValue(newValue);
   };
   
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
   // 添加候选人
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const candidate: Candidate = {
-      name: formData.name,
-      email: formData.email,
-      appliedRole: formData.appliedRole,
-      resumeUrl: formData.resumeUrl,
-      experience: formData.experience,
-      id: 0, // 你可能需要在这里设置一个默认值
-      status: 'NEW', // 你可能需要在这里设置一个默认值
-      createdAt: '', // 你可能需要在这里设置一个默认值
-      updatedAt: '' // 你可能需要在这里设置一个默认值
-    };
+  const handleCandidateSubmit = async (candidate: Candidate) => {
+    console.log('candidate_info', candidate);
     try {
       const data = await addCandidate(candidate);
       console.log('添加候选人', data);
@@ -125,7 +99,6 @@ const CandidateList: React.FC = () => {
     } catch (error) {
       console.error('error', error);
     }
-    setFormData({ name: '', email: '', appliedRole: '', resumeUrl: '', experience: '' });
     setIsAddDrawerOpen(false);
   };
 
@@ -237,112 +210,11 @@ const CandidateList: React.FC = () => {
       </div>
       
       {/* 添加候选人表单 */}
-      <div className={`fixed inset-y-0 right-0 w-full max-w-md bg-white shadow-xl transform transition-transform duration-300 ease-in-out z-30 ${isAddDrawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-        <div className="h-full flex flex-col">
-          <div className="flex items-center justify-between px-6 py-4 border-b">
-            <h2 className="text-xl font-semibold text-gray-900">Add New Candidate</h2>
-            <button 
-              onClick={() => setIsAddDrawerOpen(false)}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-          
-          <div className="flex-1 overflow-y-auto p-6">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                  Full Name{' '}
-                  <span className="text-xs text-gray-500">(required)</span>
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                  Email Address{' '}
-                  <span className="text-xs text-gray-500">(required)</span>
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="role" className="block text-sm font-medium text-gray-700">
-                  Applied Role{' '}
-                  <span className="text-xs text-gray-500">(required)</span>
-                </label>
-                <input
-                  type="text"
-                  id="appliedRole"
-                  name="appliedRole"
-                  value={formData.appliedRole}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="resumeUrl" className="block text-sm font-medium text-gray-700">
-                  Resume URL{' '}
-                  <span className="text-xs text-gray-500">(required)</span>
-                </label>
-                <input
-                  type="url"
-                  id="resumeUrl"
-                  name="resumeUrl"
-                  value={formData.resumeUrl}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="experience" className="block text-sm font-medium text-gray-700">
-                  Experience{' '}
-                  <span className="text-xs text-gray-500">(required)</span>
-                </label>
-                <input
-                  type="text"
-                  id="experience"
-                  name="experience"
-                  value={formData.experience}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500"
-                  required
-                />
-              </div>
-
-              <div className="pt-4">
-                <button
-                  type="submit"
-                  className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                >
-                  Add Candidate
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
+      <AddForm
+        isOpen={isAddDrawerOpen}
+        onClose={() => setIsAddDrawerOpen(false)}
+        onSubmit={(candidate: Candidate) => {handleCandidateSubmit(candidate)}}
+      />
       
       {/* 更新候选人信息 */}
       <OpenForm
