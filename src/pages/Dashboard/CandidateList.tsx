@@ -5,10 +5,13 @@ import { Candidate } from '../../types';
 import ScheduleInterviewDrawer from './ScheduleInterviewDrawer';
 import { addCandidate, editCandidate, getCandidateList } from '../../api/candidate/candidate';
 import EditNoteOutlinedIcon from '@mui/icons-material/EditNoteOutlined';
+import NoteAddOutlinedIcon from '@mui/icons-material/NoteAddOutlined';
 import OpenForm from './openForm';
 import AddIcon from '@mui/icons-material/Add';
 import { Tab, Tabs, Input } from '@mui/material';
 import AddForm from './addForm';
+import NoteDrawer from '../../components/NoteDrawer';
+
 const statusColors: { [key: string]: string } = {
   NEW: 'bg-blue-100 text-blue-800',
   IN_PROGRESS: 'bg-yellow-100 text-yellow-800',
@@ -36,6 +39,7 @@ const CandidateList: React.FC = () => {
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   const [candidatesList, setCandidatesList] = useState<Candidate[]>([]);
   const [filteredCandidates, setFilteredCandidates] = useState<Candidate[]>([]);
+  const [isNoteDrawerOpen, setIsNoteDrawerOpen] = useState(false);
   
   // 获取候选人列表
   useEffect(() => {
@@ -129,30 +133,35 @@ const CandidateList: React.FC = () => {
   return (
     <div className="p-6 bg-gray-50">
       <div className="flex flex-row justify-between items-center mb-4">
-      <div className="flex items-center gap-2 h-full">
-        <h2 className="text-2xl font-bold text-gray-900">Candidates</h2>
-        <button 
-          onClick={() => setIsAddDrawerOpen(true)}
-          className="h-6 w-6 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-        >
-          <AddIcon />
-        </button>
+        <div className="flex items-center gap-2 h-full">
+          <h2 className="text-2xl font-bold text-gray-900">Candidates</h2>
+          <button
+            onClick={() => setIsAddDrawerOpen(true)}
+            className="h-6 w-6 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            <AddIcon />
+          </button>
 
-        {/* 搜索框 */}
-        <div className="relative w-full md:w-64 ml-8">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-          <Input
-            type="search"
-            placeholder="Search Candidate"
-            className="pl-8"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+          {/* 搜索框 */}
+          <div className="relative w-full md:w-64 ml-8">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+            <Input
+              type="search"
+              placeholder="Search Candidate"
+              className="pl-8"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
         </div>
-      </div>
 
-      {/* tab分类栏 */}
-        <Tabs value={tabValue} onChange={handleTabChange} textColor="primary" aria-label="candidate status">
+        {/* tab分类栏 */}
+        <Tabs
+          value={tabValue}
+          onChange={handleTabChange}
+          textColor="primary"
+          aria-label="candidate status"
+        >
           <Tab label="All" {...a11yProps(0)} />
           <Tab label="Active" {...a11yProps(1)} />
           <Tab label="Offer" {...a11yProps(2)} />
@@ -164,39 +173,57 @@ const CandidateList: React.FC = () => {
         <div className="grid grid-cols-1 gap-4 sm:gap-6 p-6">
           {filteredCandidates.length > 0 ? (
             filteredCandidates.map((candidate) => (
-              <div key={candidate.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg hover:shadow-md transition-shadow">
+              <div
+                key={candidate.id}
+                className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg hover:shadow-md transition-shadow"
+              >
                 <div className="flex-1">
                   <div className="flex items-center mb-2">
-                    <h3 className="text-lg font-semibold text-gray-900">{candidate.name}</h3>
-                    <button className="ml-2 hover:text-gray-500 cursor-pointer" onClick={() => handleEditCandidate(candidate)}>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {candidate.name}
+                    </h3>
+                    <button
+                      className="ml-2 hover:text-gray-500 cursor-pointer"
+                      onClick={() => handleEditCandidate(candidate)}
+                    >
                       <EditNoteOutlinedIcon className="w-4 h-4" />
                     </button>
-                    <span className={`ml-3 px-3 py-1 rounded-full text-xs font-medium ${statusColors[candidate.status]}`}>
+                    <span
+                      className={`ml-3 px-3 py-1 rounded-full text-xs font-medium ${
+                        statusColors[candidate.status]
+                      }`}
+                    >
                       {candidate.status}
                     </span>
                   </div>
                   <div className="flex items-center text-sm mb-2 text-gray-500">
-                  <span className="mr-2">Applied Role:</span>
-                  <p className="text-gray-600">{candidate.appliedRole}</p>
+                    <span className="mr-2">Applied Role:</span>
+                    <p className="text-gray-600">{candidate.appliedRole}</p>
                   </div>
                   <div className="flex items-center text-sm text-gray-500">
                     <Calendar className="w-4 h-4 mr-1" />
-                    {format(new Date(candidate.createdAt), 'MMM d, yyyy')}
+                    {format(new Date(candidate.createdAt), "MMM d, yyyy")}
                     <Star className="w-4 h-4 ml-4 mr-1" />
                     Match Score: 50%
                   </div>
                 </div>
-                
+
                 <div className="flex items-center mt-4 sm:mt-0">
+                  <button
+                    onClick={() => setIsNoteDrawerOpen(true)}
+                    className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg mr-2"
+                  >
+                    <NoteAddOutlinedIcon className="w-4 h-4 mr-1" />
+                  </button>
                   <button className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg mr-2">
                     <FileText className="w-4 h-4 mr-1" />
                     Resume
                   </button>
-                  <button 
+                  <button
                     onClick={() => handleScheduleInterview(candidate)}
                     className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                   >
-                    Schedule Interview
+                    Schedule
                   </button>
                 </div>
               </div>
@@ -208,22 +235,26 @@ const CandidateList: React.FC = () => {
           )}
         </div>
       </div>
-      
+
       {/* 添加候选人表单 */}
       <AddForm
         isOpen={isAddDrawerOpen}
         onClose={() => setIsAddDrawerOpen(false)}
-        onSubmit={(candidate: Candidate) => {handleCandidateSubmit(candidate)}}
+        onSubmit={(candidate: Candidate) => {
+          handleCandidateSubmit(candidate);
+        }}
       />
-      
+
       {/* 更新候选人信息 */}
       <OpenForm
         isOpen={isOpenEditForm}
         onClose={() => {
-          setIsOpenEditForm(false)
-          setSelectedCandidate(null)
+          setIsOpenEditForm(false);
+          setSelectedCandidate(null);
         }}
-        onSubmit={(candidate: Candidate) => {handleUpdateCandidate(candidate)}}
+        onSubmit={(candidate: Candidate) => {
+          handleUpdateCandidate(candidate);
+        }}
         candidate={selectedCandidate || undefined}
       />
 
@@ -241,7 +272,7 @@ const CandidateList: React.FC = () => {
 
       {/* Overlay */}
       {(isAddDrawerOpen || isScheduleDrawerOpen || isOpenEditForm) && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 transition-opacity z-20"
           onClick={() => {
             setIsAddDrawerOpen(false);
@@ -251,6 +282,12 @@ const CandidateList: React.FC = () => {
           }}
         />
       )}
+
+      {/* Note Drawer */}
+      <NoteDrawer
+        isOpen={isNoteDrawerOpen}
+        onClose={() => setIsNoteDrawerOpen(false)}
+      />
     </div>
   );
 };

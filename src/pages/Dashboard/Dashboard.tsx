@@ -6,6 +6,7 @@ import { DashboardStats } from '../../types';
 import { getCandidateList, getHiredCandidates, getActiveInterviews, getCandidatesInProgress } from '../../api/candidate/candidate';
 import { useState, useEffect } from 'react';
 import { Interview } from '../../types';
+
 interface Candidate {
   id: number;
   name: string;
