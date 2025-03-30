@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { User, LogOut, Settings, CreditCard, ChevronDown } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 // interface NavBarProps {
 //   isMenuOpen: boolean;
@@ -9,10 +10,11 @@ import { User, LogOut, Settings, CreditCard, ChevronDown } from 'lucide-react';
 
 const NavBar: React.FC = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-
+    const navigate = useNavigate();
     const handleSignOut = () => {
       // Handle sign out logic here
       console.log('Signing out...');
+      navigate('/login');
     };
   return (
     <nav className="bg-white shadow-sm">

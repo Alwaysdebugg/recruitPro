@@ -1,8 +1,8 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import {
   Container,
   Box,
@@ -11,68 +11,68 @@ import {
   Button,
   Link,
   Alert,
-  CircularProgress
-} from '@mui/material';
-import { styled } from '@mui/material/styles';
+  CircularProgress,
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
 
 // Define form validation schema
 const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters')
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 // Custom styled components with Apple-like styling
 const StyledContainer = styled(Container)(({ theme }) => ({
-  minHeight: '100vh',
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
+  minHeight: "100vh",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
   padding: theme.spacing(4),
-  backgroundColor: '#ffffff',
-  position: 'relative',
+  backgroundColor: "#ffffff",
+  position: "relative",
 }));
 
 const StyledBox = styled(Box)(({ theme }) => ({
-  width: '100%',
-  maxWidth: '460px',
+  width: "100%",
+  maxWidth: "460px",
   padding: theme.spacing(4),
-  borderRadius: '18px',
-  backgroundColor: '#ffffff',
-  boxShadow: '0 4px 24px rgba(0, 0, 0, 0.1)',
+  borderRadius: "18px",
+  backgroundColor: "#ffffff",
+  boxShadow: "0 4px 24px rgba(0, 0, 0, 0.1)",
 }));
 
 const StyledTextField = styled(TextField)(({ theme }) => ({
-  '& .MuiOutlinedInput-root': {
-    borderRadius: '12px',
-    backgroundColor: '#f5f5f7',
-    '& fieldset': {
-      borderColor: 'transparent',
+  "& .MuiOutlinedInput-root": {
+    borderRadius: "12px",
+    backgroundColor: "#f5f5f7",
+    "& fieldset": {
+      borderColor: "transparent",
     },
-    '&:hover fieldset': {
-      borderColor: 'transparent',
+    "&:hover fieldset": {
+      borderColor: "transparent",
     },
-    '&.Mui-focused fieldset': {
-      borderColor: '#0071e3',
+    "&.Mui-focused fieldset": {
+      borderColor: "#0071e3",
     },
   },
-  '& .MuiInputLabel-root': {
-    color: '#86868b',
+  "& .MuiInputLabel-root": {
+    color: "#86868b",
   },
   marginBottom: theme.spacing(2),
 }));
 
 const StyledButton = styled(Button)(({ theme }) => ({
-  borderRadius: '12px',
-  padding: '12px',
-  fontSize: '17px',
+  borderRadius: "12px",
+  padding: "12px",
+  fontSize: "17px",
   fontWeight: 400,
-  textTransform: 'none',
-  backgroundColor: '#0071e3',
-  '&:hover': {
-    backgroundColor: '#0077ed',
+  textTransform: "none",
+  backgroundColor: "#0071e3",
+  "&:hover": {
+    backgroundColor: "#0077ed",
   },
 }));
 
@@ -84,37 +84,39 @@ export function Login() {
   const {
     control,
     handleSubmit,
-    formState: { errors }
+    formState: { errors },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: '',
-      password: ''
-    }
+      email: "",
+      password: "",
+    },
   });
 
   const onSubmit = async (data: LoginFormValues) => {
     try {
       setIsLoading(true);
       setError(null);
-      
-      // TODO: Implement login logic
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
 
-      if (!response.ok) {
-        throw new Error('Login failed. Please check your email and password');
-      }
+      // TODO: Implement login logic
+    //   const response = await fetch("/api/login", {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify(data),
+    //   });
+
+    //   if (!response.ok) {
+    //     throw new Error("Login failed. Please check your email and password");
+    //   }
 
       // Redirect to dashboard after successful login
-      navigate('/dashboard');
+      navigate("/");
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred during login');
+      setError(
+        err instanceof Error ? err.message : "An error occurred during login"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -126,7 +128,7 @@ export function Login() {
         variant="h4"
         component="h3"
         sx={{
-          position: 'absolute',
+          position: "absolute",
           top: 24,
           left: 24,
           fontWeight: 700,
@@ -233,4 +235,4 @@ export function Login() {
       </StyledBox>
     </StyledContainer>
   );
-} 
+}
