@@ -14,6 +14,8 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { login } from "../../api/user/auth";
+import { useUser } from "../../contexts/userContext";
 
 // Define form validation schema
 const loginSchema = z.object({
@@ -80,6 +82,7 @@ export function Login() {
   const navigate = useNavigate();
   const [error, setError] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
+  const { setUser } = useUser();
 
   const {
     control,
@@ -93,33 +96,24 @@ export function Login() {
     },
   });
 
-  const onSubmit = async (data: LoginFormValues) => {
-    try {
+  const onSubmit = (data: LoginFormValues) => {
       setIsLoading(true);
       setError(null);
-
-      // TODO: Implement login logic
-    //   const response = await fetch("/api/login", {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify(data),
-    //   });
-
-    //   if (!response.ok) {
-    //     throw new Error("Login failed. Please check your email and password");
-    //   }
-
-      // Redirect to dashboard after successful login
-      navigate("/");
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "An error occurred during login"
-      );
-    } finally {
-      setIsLoading(false);
-    }
+      // login
+      login(data.email, data.password)
+      .then((res) => {
+        if (res) {
+          setUser(res.user); // 保存用户信息到context
+          navigate("/");
+          setIsLoading(false);
+        } else {
+          throw new Error("Login failed. Please check your email and password");
+        }
+      })
+      .catch((err) => {
+        setError(err.message);
+        setIsLoading(false);
+      });
   };
 
   return (

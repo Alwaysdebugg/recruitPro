@@ -7,32 +7,46 @@ import HiredCandidates from './pages/HiredCandidates';
 import NavBar from './components/NavBar';
 import { Login } from './pages/user/Login';
 import { Register } from './pages/user/Register';
+import axios from 'axios';
+import { useEffect } from 'react';
+import { UserProvider } from './contexts/userContext';
 
 export function App() {
+  useEffect(() => {
+    // 检查是否有存储的token
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      // 设置axios的默认header
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
+  }, []);
+  
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-100">
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route
-            path="/*"
-            element={
-              <>
-                <NavBar />
-                <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-                  <Routes>
-                    <Route path="/" element={<><Dashboard /><CandidateList /></>} />
-                    <Route path="/active-interviews" element={<ActiveInterviews />} />
-                    <Route path="/hiring-progress" element={<HiringProgress />} />
-                    <Route path="/hired-candidates" element={<HiredCandidates />} />
-                  </Routes>
-                </main>
-              </>
-            }
-          />
-        </Routes>
-      </div>
-    </Router>
+    <UserProvider>
+      <Router>
+        <div className="min-h-screen bg-gray-100">
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route
+              path="/*"
+              element={
+                <>
+                  <NavBar />
+                  <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+                    <Routes>
+                      <Route path="/" element={<><Dashboard /><CandidateList /></>} />
+                      <Route path="/active-interviews" element={<ActiveInterviews />} />
+                      <Route path="/hiring-progress" element={<HiringProgress />} />
+                      <Route path="/hired-candidates" element={<HiredCandidates />} />
+                    </Routes>
+                  </main>
+                </>
+              }
+            />
+          </Routes>
+        </div>
+      </Router>
+    </UserProvider>
   );
 }

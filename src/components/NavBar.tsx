@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { User, LogOut, Settings, CreditCard, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { logout } from '../api/user/auth';
+import { useUser } from '../contexts/userContext';
 
 // interface NavBarProps {
 //   isMenuOpen: boolean;
@@ -11,10 +13,20 @@ import { useNavigate } from 'react-router-dom';
 const NavBar: React.FC = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const navigate = useNavigate();
+    const { user, setUser } = useUser();
     const handleSignOut = () => {
-      // Handle sign out logic here
-      console.log('Signing out...');
-      navigate('/login');
+      if (!user) return;
+      logout(user.id)
+      .then((res) => {
+        if (res) {
+          setUser(null);
+          navigate('/login');
+          console.log("logout success");
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+      });
     };
   return (
     <nav className="bg-white shadow-sm">
@@ -34,7 +46,7 @@ const NavBar: React.FC = () => {
               <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
                 <User className="w-5 h-5 text-indigo-600" />
               </div>
-              <span className="font-medium">John Doe</span>
+              <span className="font-medium">{user?.firstName} {user?.lastName}</span>
               <ChevronDown className="w-4 h-4 text-gray-500" />
             </button>
 

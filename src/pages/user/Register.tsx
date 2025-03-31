@@ -14,6 +14,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import { register } from '../../api/user/auth';
 
 // Define form validation schema
 const registerSchema = z.object({
@@ -105,31 +106,21 @@ export function Register() {
     }
   });
 
-  const onSubmit = async (data: RegisterFormValues) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      // TODO: Implement registration logic
-      const response = await fetch('/api/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        throw new Error('Registration failed. Please try again.');
+  const onSubmit = (data: RegisterFormValues) => {
+    setIsLoading(true);
+    register(data.firstName, data.lastName, data.email, data.password)
+    .then((res) => {
+      if (res) {
+        console.log("register success", res);
+        navigate("/login");
+      } else {
+        throw new Error("Registration failed. Please try again.");
       }
-
-      // Redirect to login page after successful registration
-      navigate('/login');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred during registration');
-    } finally {
+    })
+    .catch((err) => {
+      setError(err.message);
       setIsLoading(false);
-    }
+    });
   };
 
   return (
