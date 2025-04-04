@@ -10,20 +10,26 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import SaveIcon from "@mui/icons-material/Save";
+import { Candidate, Note } from "../types";
 
 interface NoteDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   initialNote?: string;
   onSave?: (note: string) => void;
+  candidate?: Candidate;
+  noteList?: Note[];
 }
 
-const NoteDrawer: React.FC<NoteDrawerProps> = ({
+// NoteDrawer 组件(声明式)
+const NoteDrawer = ({
   isOpen,
   onClose,
   initialNote = "",
   onSave,
-}) => {
+  candidate,
+  noteList,
+}: NoteDrawerProps) => {
   const [note, setNote] = useState(initialNote);
 
   const handleSave = () => {
@@ -93,6 +99,38 @@ const NoteDrawer: React.FC<NoteDrawerProps> = ({
               },
             }}
           />
+          {noteList?.map((note) => (
+            <Box 
+              key={note.id} 
+              sx={{ 
+                mt: 2,
+                p: 2,
+                backgroundColor: '#f5f5f7',
+                borderRadius: 1
+              }}
+            >
+              <Typography variant="body2" color="text.secondary">
+                {note.content}
+              </Typography>
+              <Typography 
+                variant="caption" 
+                color="text.secondary" 
+                sx={{ 
+                  display: 'block',
+                  mt: 1
+                }}
+              >
+                {new Date(note.created_at).toLocaleString('en-US', {
+                  year: 'numeric',
+                  month: '2-digit', 
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit'
+                })}
+              </Typography>
+            </Box>
+          ))}
         </Box>
 
         {/* Footer */}

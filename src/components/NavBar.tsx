@@ -15,7 +15,11 @@ const NavBar: React.FC = () => {
     const navigate = useNavigate();
     const { user, setUser } = useUser();
     const handleSignOut = () => {
-      if (!user) return;
+      if(!user) {
+        console.log('no user info')
+        navigate('/login');
+        return;
+      }
       logout(user.id)
       .then((res) => {
         if (res) {

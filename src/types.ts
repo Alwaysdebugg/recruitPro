@@ -6,6 +6,7 @@ export interface Candidate {
   status: string;
   experience: string;
   resumeUrl: string;
+  note: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -34,4 +35,12 @@ export interface DashboardStats {
     hired: number;
     rejected: number;
   };
+}
+
+export interface Note {
+  id: number;
+  candidate_id: number;
+  content: string;
+  created_by: string;
+  created_at: string;
 }

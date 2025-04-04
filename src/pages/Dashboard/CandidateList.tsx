@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { FileText, Calendar, Star, X, Search } from 'lucide-react';
-import { Candidate } from '../../types';
+import { Candidate, Note } from '../../types';
 import ScheduleInterviewDrawer from './ScheduleInterviewDrawer';
-import { addCandidate, editCandidate, getCandidateList } from '../../api/candidate/candidate';
+import { addCandidate, editCandidate, getCandidateList, getCandidateNoteList, updateCandidateNote } from '../../api/candidate/candidate';
 import EditNoteOutlinedIcon from '@mui/icons-material/EditNoteOutlined';
 import NoteAddOutlinedIcon from '@mui/icons-material/NoteAddOutlined';
 import OpenForm from './openForm';
@@ -40,6 +40,7 @@ const CandidateList: React.FC = () => {
   const [candidatesList, setCandidatesList] = useState<Candidate[]>([]);
   const [filteredCandidates, setFilteredCandidates] = useState<Candidate[]>([]);
   const [isNoteDrawerOpen, setIsNoteDrawerOpen] = useState(false);
+  const [noteList, setNoteList] = useState<Note[]>([]);
   
   // 获取候选人列表
   useEffect(() => {
@@ -82,8 +83,8 @@ const CandidateList: React.FC = () => {
       // 同时满足状态和搜索条件
       return statusMatch && searchMatch;
     });
-    console.log('filtered', filtered);
-    
+    // console.log('filtered', filtered);
+    console.log('filteredCandidates', filtered);
     setFilteredCandidates(filtered);
   }, [tabValue, searchQuery, candidatesList]);
 
@@ -111,9 +112,10 @@ const CandidateList: React.FC = () => {
     setIsScheduleDrawerOpen(true);
   };
 
-  // openForm 编辑候选人信息
+  //  编辑候选人信息(openForm)
   const handleEditCandidate = async (candidate: Candidate) => {
     setSelectedCandidate(candidate);
+    console.log('selectedCandidate', selectedCandidate);
     setIsOpenEditForm(true);
   };
 
@@ -129,6 +131,35 @@ const CandidateList: React.FC = () => {
     const data = await getCandidateList();
     setCandidatesList(data.candidates);
   };
+
+  // 打开备注抽屉
+  const handleOpenNoteDrawer = (candidate: Candidate) => {
+    console.log('candidate_note', candidate);
+    setSelectedCandidate(candidate);
+    setIsNoteDrawerOpen(true);
+    getNoteList(candidate.id); // 获取候选人备注列表
+  }
+
+  // 保存候选人备注
+  const handleSaveNote = async (candidateId: number, note: string) => {
+    console.log('selectedCandidate_note', selectedCandidate);
+    const data = await updateCandidateNote(candidateId, note);
+    console.log('candidateId', candidateId);
+    console.log('note', note);
+    console.log('更新候选人备注', data);
+    getList();
+  }
+
+  // 获取候选人备注列表
+  const getNoteList = async (candidateId: number) => {
+    try {
+      const data = await getCandidateNoteList(candidateId);
+      console.log('note_data', data);
+      setNoteList(data as Note[]);
+    } catch (error) {
+      console.error('error', error);
+    }
+  }
 
   return (
     <div className="p-6 bg-gray-50">
@@ -210,7 +241,7 @@ const CandidateList: React.FC = () => {
 
                 <div className="flex items-center mt-4 sm:mt-0">
                   <button
-                    onClick={() => setIsNoteDrawerOpen(true)}
+                    onClick={() => handleOpenNoteDrawer(candidate)}
                     className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg mr-2"
                   >
                     <NoteAddOutlinedIcon className="w-4 h-4 mr-1" />
@@ -266,9 +297,21 @@ const CandidateList: React.FC = () => {
             setIsScheduleDrawerOpen(false);
             setSelectedCandidate(null);
           }}
-          candidate={selectedCandidate}
+          candidate={selectedCandidate || undefined}
         />
       )}
+
+      {/* Note Drawer */}
+      <NoteDrawer
+        isOpen={isNoteDrawerOpen}
+        onClose={() => setIsNoteDrawerOpen(false)}
+        initialNote={selectedCandidate?.note || ''}
+        onSave={(note: string) => {
+          handleSaveNote(selectedCandidate?.id || 0, note);
+        }}
+        candidate={selectedCandidate || undefined}
+        noteList={noteList}
+      />
 
       {/* Overlay */}
       {(isAddDrawerOpen || isScheduleDrawerOpen || isOpenEditForm) && (
@@ -282,12 +325,6 @@ const CandidateList: React.FC = () => {
           }}
         />
       )}
-
-      {/* Note Drawer */}
-      <NoteDrawer
-        isOpen={isNoteDrawerOpen}
-        onClose={() => setIsNoteDrawerOpen(false)}
-      />
     </div>
   );
 };
