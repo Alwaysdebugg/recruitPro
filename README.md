@@ -1,5 +1,5 @@
 # RecruitPro - 招聘管理系统
- 
+
 **RecruitPro 是一个现代化的招聘管理系统**，用于帮助企业高效管理 **候选人、面试安排、招聘进度**，并支持 **AI 简历匹配**
 
 ## **项目概述**
@@ -18,7 +18,7 @@
 - **招聘进度跟踪**: 按阶段查看候选人分布
 - **已录用候选人**: 查看已录用候选人信息
 - **面试安排**: 集成 Google Calendar API 安排面试
-- AI简历匹配：通过 **pgvector + OpenAI** 计算职位匹配度
+- AI 简历匹配：通过 **pgvector + OpenAI** 计算职位匹配度
 - 自动化通知：面试提醒（邮件/短信通知）
 - 权限管理（admin/HR/面试官）
 
@@ -28,20 +28,20 @@
 - 后端：NestJS、postgreSQL，supabase
 - DevOps：Docker
 
-### UI设计规范
+### UI 设计规范
 
 #颜色搭配
-- 主要button、重点信息：#007bff
+
+- 主要 button、重点信息：#007bff
 - 背景色：#f8f9fa
 - 文字颜色：#343a40
 - 成功状态：#28a745
 - 失败状态：#dc3545
 
 #组件风格
-	✅ **使用 Tailwind CSS 进行组件化**  
-	✅ **按钮 & 输入框使用统一的圆角（rounded-lg）**  
-	✅ **响应式布局（支持 PC & 移动端）**
-
+✅ **使用 Tailwind CSS 进行组件化**  
+ ✅ **按钮 & 输入框使用统一的圆角（rounded-lg）**  
+ ✅ **响应式布局（支持 PC & 移动端）**
 
 ### 数据库设计
 
@@ -85,7 +85,6 @@ CREATE TABLE resumes (
 
 ```
 
-
 ### API 设计
 
 - GET - /api/candidates - 获取候选人列表
@@ -97,15 +96,15 @@ CREATE TABLE resumes (
 
 ## 项目结构
 
-recruitpro/
-├── src/
-│ ├── components/ # 可复用组件
-│ ├── types/ # TypeScript 类型定义
-│ ├── App.tsx # 主应用组件
-│ ├── main.tsx # 应用入口
-│ └── index.css # 全局样式
-├── public/ # 静态资源
-├── package.json # 项目依赖和脚本
-├── vite.config.ts # Vite 配置
-├── tailwind.config.js # Tailwind CSS 配置
-└── postcss.config.js # PostCSS 配置
+    recruitpro/
+    ├── src/
+    │ ├── components/ # 可复用组件
+    │ ├── types/ # TypeScript 类型定义
+    │ ├── App.tsx # 主应用组件
+    │ ├── main.tsx # 应用入口
+    │ └── index.css # 全局样式
+    ├── public/ # 静态资源
+    ├── package.json # 项目依赖和脚本
+    ├── vite.config.ts # Vite 配置
+    ├── tailwind.config.js # Tailwind CSS 配置
+    └── postcss.config.js # PostCSS 配置

@@ -11,6 +11,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { Tab, Tabs, Input } from '@mui/material';
 import AddForm from './addForm';
 import NoteDrawer from '../../components/NoteDrawer';
+import ResumeUploadDrawer from './resumeUploadDrawer';
 
 const statusColors: { [key: string]: string } = {
   NEW: 'bg-blue-100 text-blue-800',
@@ -41,6 +42,7 @@ const CandidateList: React.FC = () => {
   const [filteredCandidates, setFilteredCandidates] = useState<Candidate[]>([]);
   const [isNoteDrawerOpen, setIsNoteDrawerOpen] = useState(false);
   const [noteList, setNoteList] = useState<Note[]>([]);
+  const [isResumeUploadDrawerOpen, setIsResumeUploadDrawerOpen] = useState(false);
   
   // 获取候选人列表
   useEffect(() => {
@@ -161,6 +163,17 @@ const CandidateList: React.FC = () => {
     }
   }
 
+  // 打开上传简历抽屉
+  const handleOpenResumeUploadDrawer = (candidate: Candidate) => {
+    setSelectedCandidate(candidate);
+    setIsResumeUploadDrawerOpen(true);
+  }
+
+  // 上传简历
+  const handleUploadResume = (candidate: Candidate) => {
+    console.log('candidate_resume', candidate);
+  }
+
   return (
     <div className="p-6 bg-gray-50">
       <div className="flex flex-row justify-between items-center mb-4">
@@ -246,7 +259,9 @@ const CandidateList: React.FC = () => {
                   >
                     <NoteAddOutlinedIcon className="w-4 h-4 mr-1" />
                   </button>
-                  <button className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg mr-2">
+                  <button className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg mr-2"
+                    onClick={() => handleOpenResumeUploadDrawer(candidate)}
+                  >
                     <FileText className="w-4 h-4 mr-1" />
                     Resume
                   </button>
@@ -313,14 +328,24 @@ const CandidateList: React.FC = () => {
         noteList={noteList}
       />
 
+      {/* Resume Upload Drawer */}
+      <ResumeUploadDrawer
+        isOpen={isResumeUploadDrawerOpen}
+        onClose={() => setIsResumeUploadDrawerOpen(false)}
+        onUpload={(candidate: Candidate) => {
+          handleUploadResume(candidate);
+        }}
+      />
+
       {/* Overlay */}
-      {(isAddDrawerOpen || isScheduleDrawerOpen || isOpenEditForm) && (
+      {(isAddDrawerOpen || isScheduleDrawerOpen || isOpenEditForm || isResumeUploadDrawerOpen) && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 transition-opacity z-20"
           onClick={() => {
             setIsAddDrawerOpen(false);
             setIsScheduleDrawerOpen(false);
             setIsOpenEditForm(false);
+            setIsResumeUploadDrawerOpen(false);
             setSelectedCandidate(null);
           }}
         />
