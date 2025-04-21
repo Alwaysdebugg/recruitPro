@@ -14,7 +14,8 @@ import { useDropzone } from 'react-dropzone';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
-import { Candidate } from "../../types";
+import { getPresignedUrl, uploadFile } from "../../api/s3/index"
+import { useUser } from "../../contexts/userContext"
 
 // 样式组件
 const DropzoneContainer = styled(Box)(({ theme }) => ({
@@ -41,13 +42,19 @@ const FilePreview = styled(Box)(({ theme }) => ({
 interface ResumeUploadDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  onUpload: (candidate: Candidate) => void;
+  onUpload: (resumeUrl: string) => void;
 }
 
 interface UploadFile extends File {
   preview?: string;
   progress?: number;
   error?: string;
+  fileUrl?: string;
+}
+
+interface PresignedUrlResponse {
+  presignedUrl: string;
+  fileKey: string;
 }
 
 const ResumeUploadDrawer = ({
@@ -57,6 +64,8 @@ const ResumeUploadDrawer = ({
 }: ResumeUploadDrawerProps) => {
   const [files, setFiles] = useState<UploadFile[]>([]);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
+  const { user } = useUser();
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const newFiles = acceptedFiles.map(file => Object.assign(file, {
@@ -81,28 +90,39 @@ const ResumeUploadDrawer = ({
     }
   });
 
+  // 实现上传功能
   const handleUpload = async () => {
     try {
-      // 模拟上传进度
+      const resumeUrls: string[] = [];
       for (let file of files) {
-        for (let progress = 0; progress <= 100; progress += 10) {
-          await new Promise(resolve => setTimeout(resolve, 100));
-          setFiles(prev => 
-            prev.map(f => 
-              f.name === file.name ? { ...f, progress } : f
-            )
-          );
-        }
-      }
+        // 1. 首先获取预签名URL
+        const formData = {
+          fileName: file.name,
+          fileType: "application/pdf",
+          userId: user?.id?.toString() || "",
+        };
+        console.log("formData", formData);        
+        const response = await getPresignedUrl(formData) as PresignedUrlResponse;
+        const { presignedUrl, fileKey } = response;
 
-      // 上传成功后调用回调
-      if (files.length > 0) {
-        console.log('files', files);
+        // 使用预签名URL上传文件
+          await uploadFile(presignedUrl, file)
+          .then((res)=> {
+            resumeUrls.push(presignedUrl);
+            console.log("upload_success", res);
+            file.progress = 100;
+            file.fileUrl = fileKey;
+          })
+          .catch((err) => {
+            console.error("Upload error details:", err);
+            setUploadError("Upload Failed: " + err.message);
+          });
       }
-      
-      onClose();
-    } catch (error) {
-      setUploadError('上传失败，请重试');
+      onUpload(resumeUrls[0]);
+      setUploadSuccess("Upload Success");
+    } catch (err) {
+      console.log('err', err);
+      setUploadError("Upload Failed, Please Try Again");
     }
   };
 
@@ -115,6 +135,13 @@ const ResumeUploadDrawer = ({
       return prev.filter(file => file.name !== fileName);
     });
   };
+
+  const handleCancel = () => {
+    setFiles([]); // 清空文件列表
+    setUploadError(null); // 清空错误信息
+    setUploadSuccess(null); // 清空成功信息
+    onClose(); // 关闭抽屉
+  }
 
   // 组件卸载时清理预览URL
   useEffect(() => {
@@ -190,6 +217,11 @@ const ResumeUploadDrawer = ({
             {uploadError}
           </Alert>
         )}
+        {uploadSuccess && (
+          <Alert severity="success" sx={{ mb: 2 }}>
+            {uploadSuccess}
+          </Alert>
+        )}
 
         <Box sx={{ display: 'flex', gap: 2, mt: 'auto' }}>
           <Button
@@ -201,7 +233,7 @@ const ResumeUploadDrawer = ({
           >
             Upload
           </Button>
-          <Button variant="outlined" onClick={onClose} fullWidth>
+          <Button variant="outlined" onClick={handleCancel} fullWidth>
             Cancel
           </Button>
         </Box>

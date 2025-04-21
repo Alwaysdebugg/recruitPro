@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { FileText, Calendar, Star, X, Search } from 'lucide-react';
 import { Candidate, Note } from '../../types';
 import ScheduleInterviewDrawer from './ScheduleInterviewDrawer';
-import { addCandidate, editCandidate, getCandidateList, getCandidateNoteList, updateCandidateNote } from '../../api/candidate/candidate';
+import { addCandidate, editCandidate, getCandidateList, getCandidateNoteList, updateCandidateNote, uploadResumeUrl } from '../../api/candidate/candidate';
 import EditNoteOutlinedIcon from '@mui/icons-material/EditNoteOutlined';
 import NoteAddOutlinedIcon from '@mui/icons-material/NoteAddOutlined';
 import OpenForm from './openForm';
@@ -170,8 +170,16 @@ const CandidateList: React.FC = () => {
   }
 
   // 上传简历
-  const handleUploadResume = (candidate: Candidate) => {
-    console.log('candidate_resume', candidate);
+  const handleUploadResume = async (resumeUrl: string) => {
+    console.log('resumeUrl', resumeUrl);
+    console.log('selectedCandidate', selectedCandidate);
+    try {
+      const res = await uploadResumeUrl(resumeUrl, Number(selectedCandidate?.id));
+      console.log('上传简历', res);
+      getList();
+    } catch (error) {
+      console.error('error', error);
+    }
   }
 
   return (
@@ -332,9 +340,7 @@ const CandidateList: React.FC = () => {
       <ResumeUploadDrawer
         isOpen={isResumeUploadDrawerOpen}
         onClose={() => setIsResumeUploadDrawerOpen(false)}
-        onUpload={(candidate: Candidate) => {
-          handleUploadResume(candidate);
-        }}
+        onUpload={handleUploadResume}
       />
 
       {/* Overlay */}

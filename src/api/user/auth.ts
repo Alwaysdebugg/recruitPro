@@ -16,6 +16,7 @@ const API_URL = 'http://localhost:3000/users';
 export const login = async (email: string, password: string) => {
   const response = await axios.post<LoginResponse>(`${API_URL}/login`, { email, password });
   if (response.data.access_token) {
+    console.log('access_token', response.data.access_token);
     localStorage.setItem('access_token', response.data.access_token);
     localStorage.setItem('user', JSON.stringify(response.data.user)); // 存储用户信息
     // 设置axios默认的header
@@ -34,8 +35,9 @@ export const register = async (firstName: string, lastName: string, email: strin
 export const logout = async (userId: number) => {
   try {
     const response = await axios.post(`${API_URL}/logout`, { userId });
-    // 清除token
+    // 删除localStorage中的access_token,user
     localStorage.removeItem('access_token');
+    localStorage.removeItem('user');
     // 清除axios默认的header
     delete axios.defaults.headers.common['Authorization'];
     return response.data;

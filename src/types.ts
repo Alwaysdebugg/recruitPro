@@ -9,6 +9,7 @@ export interface Candidate {
   note: string;
   createdAt: string;
   updatedAt: string;
+  resumes: string[];
 }
 
 export interface Interview {

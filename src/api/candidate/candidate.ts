@@ -62,6 +62,12 @@ export const getCandidateNoteList = async (candidateId: number) => {
   return response.data;
 };
 
+// 上传简历 @post
+export const uploadResumeUrl = async (resumeUrl: string, candidateId: number) => {
+  const response = await axios.post(`${API_URL}/resumes/upload`, { resumeUrl, candidateId });
+  return response.data;
+};
+
 
 
 

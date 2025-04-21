@@ -10,6 +10,7 @@ import { Register } from './pages/user/Register';
 import axios from 'axios';
 import { useEffect } from 'react';
 import { UserProvider } from './contexts/userContext';
+import PrivateRoute from './components/PrivateRoute';
 
 export function App() {
   useEffect(() => {
@@ -31,17 +32,19 @@ export function App() {
             <Route
               path="/*"
               element={
-                <>
-                  <NavBar />
-                  <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-                    <Routes>
+                <PrivateRoute>
+                  <>
+                    <NavBar />
+                    <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+                      <Routes>
                       <Route path="/" element={<><Dashboard /><CandidateList /></>} />
                       <Route path="/active-interviews" element={<ActiveInterviews />} />
                       <Route path="/hiring-progress" element={<HiringProgress />} />
                       <Route path="/hired-candidates" element={<HiredCandidates />} />
                     </Routes>
                   </main>
-                </>
+                  </>
+                </PrivateRoute>
               }
             />
           </Routes>

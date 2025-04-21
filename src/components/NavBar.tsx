@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { User, LogOut, Settings, CreditCard, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../api/user/auth';
-import { useUser } from '../contexts/userContext';
 
 // interface NavBarProps {
 //   isMenuOpen: boolean;
@@ -13,22 +12,19 @@ import { useUser } from '../contexts/userContext';
 const NavBar: React.FC = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const navigate = useNavigate();
-    const { user, setUser } = useUser();
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
     const handleSignOut = () => {
-      if(!user) {
-        console.log('no user info')
-        navigate('/login');
-        return;
-      }
+      console.log('user',user);
+      // TODO: 调用后端接口删除access_token
+      if (!user) return;
       logout(user.id)
-      .then((res) => {
-        if (res) {
-          setUser(null);
+      .then((res:any) => {
+        if (res.success) {
           navigate('/login');
           console.log("logout success");
         }
       })
-      .catch((err) => {
+      .catch((err:any) => {
         console.error(err);
       });
     };
