@@ -8,7 +8,9 @@ import {
   Box,
   IconButton,
   LinearProgress,
-  Alert
+  Alert,
+  Tabs,
+  Tab
 } from "@mui/material";
 import { useDropzone } from 'react-dropzone';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
@@ -16,6 +18,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import { getPresignedUrl, uploadFile } from "../../api/s3/index"
 import { useUser } from "../../contexts/userContext"
+import ResumeHistory from "../../components/Resume/ResumeHistory";
+import { ResumeRecord } from "../../api/resumeUpload/resumeService";
 
 // 样式组件
 const DropzoneContainer = styled(Box)(({ theme }) => ({
@@ -66,6 +70,8 @@ const ResumeUploadDrawer = ({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
   const { user } = useUser();
+  const [tabValue, setTabValue] = useState(0);
+  const [refreshHistory, setRefreshHistory] = useState(0);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const newFiles = acceptedFiles.map(file => Object.assign(file, {
@@ -105,8 +111,8 @@ const ResumeUploadDrawer = ({
         const response = await getPresignedUrl(formData) as PresignedUrlResponse;
         const { presignedUrl, fileKey } = response;
 
-        // 使用预签名URL上传文件
-          await uploadFile(presignedUrl, file)
+        // 2. 使用预签名URL上传文件
+        await uploadFile(presignedUrl, file)
           .then((res)=> {
             resumeUrls.push(presignedUrl);
             console.log("upload_success", res);
@@ -118,8 +124,13 @@ const ResumeUploadDrawer = ({
             setUploadError("Upload Failed: " + err.message);
           });
       }
-      onUpload(resumeUrls[0]);
-      setUploadSuccess("Upload Success");
+      if (resumeUrls.length > 0) {
+        onUpload(resumeUrls[0]);
+        setUploadSuccess("Upload Success");
+        setFiles([]);
+        setRefreshHistory(prev => prev + 1); // 触发历史记录刷新
+        setTabValue(1); // 切换到历史记录选项卡
+      }
     } catch (err) {
       console.log('err', err);
       setUploadError("Upload Failed, Please Try Again");
@@ -127,6 +138,7 @@ const ResumeUploadDrawer = ({
   };
 
   const handleRemoveFile = (fileName: string) => {
+    setUploadSuccess(null);
     setFiles(prev => {
       const removedFile = prev.find(f => f.name === fileName);
       if (removedFile?.preview) {
@@ -142,6 +154,15 @@ const ResumeUploadDrawer = ({
     setUploadSuccess(null); // 清空成功信息
     onClose(); // 关闭抽屉
   }
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
+  };
+
+  const handleSelectResume = (resume: ResumeRecord) => {
+    onUpload(resume.fileKey);
+    onClose();
+  };
 
   // 组件卸载时清理预览URL
   useEffect(() => {
@@ -165,78 +186,98 @@ const ResumeUploadDrawer = ({
             xs: "100%",
             sm: 400,
           },
-          p: 3
+          p: 0,
+          display: 'flex',
+          flexDirection: 'column'
         }
       }}
     >
-      <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-        <Typography variant="h6" component="h2" gutterBottom>
-          Upload Resume
+      <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+        <Typography variant="h6" component="h2">
+          Resume Management
         </Typography>
+      </Box>
+      
+      <Tabs value={tabValue} onChange={handleTabChange} aria-label="resume tabs">
+        <Tab label="Upload New" />
+        <Tab label="History" />
+      </Tabs>
+      
+      <Box sx={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        {tabValue === 0 ? (
+          <Box sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <DropzoneContainer {...getRootProps()}>
+              <input {...getInputProps()} />
+              <CloudUploadIcon sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
+              <Typography variant="body1" gutterBottom>
+                {isDragActive
+                  ? 'Drop the files here...'
+                  : 'Drag & drop resume files here, or click to select files'}
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                Supported formats: PDF, DOC, DOCX (Max 5MB)
+              </Typography>
+            </DropzoneContainer>
 
-        <DropzoneContainer {...getRootProps()}>
-          <input {...getInputProps()} />
-          <CloudUploadIcon sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
-          <Typography variant="body1" gutterBottom>
-            {isDragActive
-              ? 'Drop the files here...'
-              : 'Drag & drop resume files here, or click to select files'}
-          </Typography>
-          <Typography variant="body2" color="textSecondary">
-            Supported formats: PDF, DOC, DOCX (Max 5MB)
-          </Typography>
-        </DropzoneContainer>
+            <Box sx={{ flex: 1, overflowY: 'auto', my: 2 }}>
+              {files.map((file) => (
+                <FilePreview key={file.name}>
+                  <InsertDriveFileIcon sx={{ mr: 2 }} />
+                  <Box sx={{ flexGrow: 1 }}>
+                    <Typography variant="body2" noWrap>{file.name}</Typography>
+                    {file.progress !== undefined && file.progress < 100 && (
+                      <LinearProgress 
+                        variant="determinate" 
+                        value={file.progress} 
+                        sx={{ mt: 1 }}
+                      />
+                    )}
+                  </Box>
+                  <IconButton 
+                    size="small" 
+                    onClick={() => handleRemoveFile(file.name)}
+                    aria-label="remove file"
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </FilePreview>
+              ))}
+            </Box>
 
-        <Box sx={{ flex: 1, overflowY: 'auto', my: 2 }}>
-          {files.map((file) => (
-            <FilePreview key={file.name}>
-              <InsertDriveFileIcon sx={{ mr: 2 }} />
-              <Box sx={{ flexGrow: 1 }}>
-                <Typography variant="body2" noWrap>{file.name}</Typography>
-                {file.progress !== undefined && file.progress < 100 && (
-                  <LinearProgress 
-                    variant="determinate" 
-                    value={file.progress} 
-                    sx={{ mt: 1 }}
-                  />
-                )}
-              </Box>
-              <IconButton 
-                size="small" 
-                onClick={() => handleRemoveFile(file.name)}
-                aria-label="remove file"
+            {uploadError && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {uploadError}
+              </Alert>
+            )}
+            {uploadSuccess && (
+              <Alert severity="success" sx={{ mb: 2 }}>
+                {uploadSuccess}
+              </Alert>
+            )}
+
+            <Box sx={{ display: 'flex', gap: 2, mt: 'auto' }}>
+              <Button
+                variant="contained"
+                onClick={handleUpload}
+                disabled={files.length === 0 || uploadSuccess !== null}
+                startIcon={<CloudUploadIcon />}
+                fullWidth
               >
-                <DeleteIcon />
-              </IconButton>
-            </FilePreview>
-          ))}
-        </Box>
-
-        {uploadError && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {uploadError}
-          </Alert>
+                Upload
+              </Button>
+              <Button variant="outlined" onClick={handleCancel} fullWidth>
+                Cancel
+              </Button>
+            </Box>
+          </Box>
+        ) : (
+          <Box sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <ResumeHistory 
+              onSelect={handleSelectResume}
+              refreshTrigger={refreshHistory}
+            />
+          </Box>
         )}
-        {uploadSuccess && (
-          <Alert severity="success" sx={{ mb: 2 }}>
-            {uploadSuccess}
-          </Alert>
-        )}
-
-        <Box sx={{ display: 'flex', gap: 2, mt: 'auto' }}>
-          <Button
-            variant="contained"
-            onClick={handleUpload}
-            disabled={files.length === 0}
-            startIcon={<CloudUploadIcon />}
-            fullWidth
-          >
-            Upload
-          </Button>
-          <Button variant="outlined" onClick={handleCancel} fullWidth>
-            Cancel
-          </Button>
-        </Box>
       </Box>
     </Drawer>
   );

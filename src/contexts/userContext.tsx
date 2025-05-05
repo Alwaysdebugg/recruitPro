@@ -1,4 +1,5 @@
 import { createContext, useContext, useState } from 'react';
+import axios from 'axios';
 
 interface User {
     id: number;
@@ -30,4 +31,10 @@ export const useUser = () => {
         throw new Error('useUser must be used within a UserProvider');
     }
     return context;
+}
+
+export const clearUser = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('user');
+    delete axios.defaults.headers.common['Authorization'];
 }
