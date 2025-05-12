@@ -15,7 +15,6 @@ import ResumeUploadDrawer from './resumeUploadDrawer';
 
 const statusColors: { [key: string]: string } = {
   NEW: 'bg-blue-100 text-blue-800',
-  IN_PROGRESS: 'bg-yellow-100 text-yellow-800',
   INTERVIEW: 'bg-purple-100 text-purple-800',
   OFFER: 'bg-green-100 text-green-800',
   HIRED: 'bg-emerald-100 text-emerald-800',
@@ -60,7 +59,7 @@ const CandidateList: React.FC = () => {
     } else {
       // 根据 Tab 值获取对应的状态列表
       const statusMap: { [key: number]: string[] } = {
-        1: ['INTERVIEW', 'IN_PROGRESS', 'SCREENING', 'NEW'],
+        1: ['INTERVIEW', 'SCREENING', 'NEW'],
         2: ['OFFER'],
         3: ['HIRED'],
         4: ['REJECTED'],

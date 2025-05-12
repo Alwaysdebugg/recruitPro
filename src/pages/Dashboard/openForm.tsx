@@ -16,7 +16,7 @@ interface OpenFormProps {
   candidate?: Candidate;
 }
  
-const status = ['NEW', 'INTERVIEW', 'OFFER', 'HIRED', 'REJECTED', 'SCREENING', 'IN_PROGRESS'];
+const status = ['NEW', 'INTERVIEW', 'OFFER', 'HIRED', 'REJECTED', 'SCREENING'];
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -48,7 +48,9 @@ const OpenForm: React.FC<OpenFormProps> = ({ isOpen, onClose, onSubmit, candidat
     experience: '',
     status: 'NEW',
     createdAt: '',
-    updatedAt: ''
+    updatedAt: '',
+    note: '',
+    resumes: []
   });
 
   // 同步候选人信息

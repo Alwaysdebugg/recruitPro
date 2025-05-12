@@ -2,7 +2,6 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReactECharts from 'echarts-for-react';
 import { Users, Calendar, FileText, PieChart } from 'lucide-react';
-import { DashboardStats } from '../../types';
 import { getCandidateList, getHiredCandidates, getActiveInterviews, getCandidatesInProgress } from '../../api/candidate/candidate';
 import { useState, useEffect } from 'react';
 import { Interview } from '../../types';
@@ -19,19 +18,19 @@ interface Candidate {
   updatedAt: string;
 }
 
-const mockStats: DashboardStats = {
-  totalCandidates: 156,
-  activeInterviews: 12,
-  hiringProgress: 68,
-  candidatesByStage: {
-    new: 45,
-    screening: 32,
-    interview: 28,
-    offer: 15,
-    hired: 24,
-    rejected: 12
-  }
-};
+// const mockStats: DashboardStats = {
+//   totalCandidates: 156,
+//   activeInterviews: 12,
+//   hiringProgress: 68,
+//   candidatesByStage: {
+//     new: 45,
+//     screening: 32,
+//     interview: 28,
+//     offer: 15,
+//     hired: 24,
+//     rejected: 12
+//   }
+// };
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -40,13 +39,20 @@ const Dashboard: React.FC = () => {
   const [hiredCandidates, setHiredCandidates] = useState<Candidate[]>([]);
   const [activeInterviews, setActiveInterviews] = useState<Interview[]>([]);
   const [candidatesInProgress, setCandidatesInProgress] = useState<Candidate[]>([]);
+  const [stageProgressOption, setStageProgressOption] = useState<any>({});
+  // 添加类型定义
+  type StageCountsType = {
+    [key in 'new' | 'screening' | 'interview' | 'offer' | 'hired' | 'rejected']: number;
+  };
 
   useEffect(() => {
     // 获取候选人列表
     const fetchCandidateList = async () => {
       const data = await getCandidateList();
+      // console.log("getCandidateList",data);
       setCandidateList(data.candidates);
-      // console.log("candidateList",data.candidates);
+      const option = updateChartOption(data.candidates);
+      setStageProgressOption(option);
     };
     fetchCandidateList();
 
@@ -61,7 +67,7 @@ const Dashboard: React.FC = () => {
     const fetchActiveInterviews = async () => {
       const data = await getActiveInterviews();
       setActiveInterviews(data.interviews);
-      // console.log("activeInterviews",data);
+      console.log("activeInterviews",data);
     };
     fetchActiveInterviews();
 
@@ -74,34 +80,68 @@ const Dashboard: React.FC = () => {
     fetchCandidatesInProgress();
   }, []);
 
-  const stageProgressOption = {
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: {
-        type: 'shadow'
-      }
-    },
-    grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '3%',
-      containLabel: true
-    },
-    xAxis: {
-      type: 'category',
-      data: ['New', 'Screening', 'Interview', 'Offer', 'Hired', 'Rejected']
-    },
-    yAxis: {
-      type: 'value'
-    },
-    series: [{
-      data: Object.values(mockStats.candidatesByStage),
-      type: 'bar',
-      barWidth: '60%',
-      itemStyle: {
-        color: '#4F46E5'
-      }
-    }]
+    // 处理图标数据
+    const processChartData = (candidates: Candidate[]) => {
+      const stageCounts: StageCountsType = {
+        new: 0,
+        screening: 0,
+        interview: 0,
+        offer: 0,
+        hired: 0,
+        rejected: 0
+      };
+  
+      candidates.forEach(candidate => {
+        const status = candidate.status.toLowerCase() as keyof StageCountsType;
+        if (status in stageCounts) {
+          stageCounts[status]++;
+        }
+      });
+  
+      return {
+        xAxisData: Object.keys(stageCounts).map(
+          (key) => key.charAt(0).toUpperCase() + key.slice(1)
+        ),
+        seriesData: Object.values(stageCounts),
+      };
+    }
+
+  const updateChartOption = (candidates: Candidate[]) => { 
+    const { xAxisData, seriesData } = processChartData(candidates);
+    return {
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+          type: 'shadow'
+        }
+      },
+      legend: {
+        data: ['Number of Candidates'],
+        bottom: 0
+      },
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '10%',
+        top: '15%',
+        containLabel: true
+      },
+      xAxis: {
+        type: 'category',
+        data: xAxisData
+      },
+      yAxis: {
+        type: 'value'
+      },
+      series: [{
+        data: seriesData,
+        type: 'bar',
+        barWidth: '60%',
+        itemStyle: {
+          color: '#4F46E5'
+        }
+      }]
+    }
   };
 
   return (
@@ -169,7 +209,12 @@ const Dashboard: React.FC = () => {
 
       <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
         <h2 className="text-xl font-semibold text-gray-900 mb-6">Candidates by Stage</h2>
-        <ReactECharts option={stageProgressOption} style={{ height: '400px' }} />
+        <ReactECharts 
+          option={stageProgressOption} 
+          style={{ height: '400px' }} 
+          notMerge={true}
+          lazyUpdate={true}
+        />
       </div>
     </div>
   );
