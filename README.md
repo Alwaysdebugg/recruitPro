@@ -1,110 +1,123 @@
-# RecruitPro - 招聘管理系统
+# RecruitPro - Recruitment Management System
 
-**RecruitPro 是一个现代化的招聘管理系统**，用于帮助企业高效管理 **候选人、面试安排、招聘进度**，并支持 **AI 简历匹配**
+<div align="center">
+  <img src="./assets/project-1.png" alt="RecruitPro Dashboard" width="400">
+  
+  **A modern recruitment management system designed to help companies efficiently manage their hiring process**
+  
+  ![Version](https://img.shields.io/badge/version-1.0.0-green.svg)
+</div>
 
-## **项目概述**
+## 📋 Overview
 
-- **项目名称**: RecruitPro
-- **目标用户**: HR 团队、招聘经理、面试官
-- **主要功能**: **候选人管理、面试安排、招聘进度跟踪、AI 简历匹配**
-- **技术栈**: **React + NestJS + PostgreSQL + pgvector**
-- **部署方式**: **Docker + Kubernetes（支持云端 & 本地部署）**
+RecruitPro helps HR teams streamline their recruitment workflow with powerful features:
 
-### 功能模块
+- **Candidate Management**: Track and organize candidate information
+- **Interview Scheduling**: Efficiently arrange and track interviews
+- **Recruitment Progress Tracking**: Monitor hiring pipeline at every stage
+- **AI Resume Matching**: Leverage AI to match candidates with job requirements
 
-- **仪表盘**: 实时查看招聘数据概览
-- **候选人管理**: 添加、查看和安排候选人面试
-- **面试管理**: 查看和管理活跃面试
-- **招聘进度跟踪**: 按阶段查看候选人分布
-- **已录用候选人**: 查看已录用候选人信息
-- **面试安排**: 集成 Google Calendar API 安排面试
-- AI 简历匹配：通过 **pgvector + OpenAI** 计算职位匹配度
-- 自动化通知：面试提醒（邮件/短信通知）
-- 权限管理（admin/HR/面试官）
+## 🎯 Target Users
 
-### Tech stack
+- HR Teams
+- Recruitment Managers
+- Interviewers
+- Hiring Managers
 
-- 前端：React、vite、Typescript、Tailwind、Echart
-- 后端：NestJS、postgreSQL，supabase
-- DevOps：Docker
+## ✨ Feature Modules
 
-### UI 设计规范
+- **Dashboard**: Real-time recruitment data overview with visualizations
+- **Candidate Management**: Add, view, and schedule candidate interviews
+- **Interview Management**: View and manage active interviews
+- **Recruitment Progress Tracking**: View candidate distribution by stage
+- **Hired Candidates**: View information of hired candidates
+- **Interview Scheduling**: Integrated with Google Calendar API for interview scheduling
+- **AI Resume Matching**: Calculate job matching degree through **pgvector + OpenAI**
+- **Automated Notifications**: Interview reminders (email/SMS notifications)
+- **Permission Management**: Role-based access control (Admin/HR/Interviewer)
 
-#颜色搭配
+## 🖼️ Screenshots
 
-- 主要 button、重点信息：#007bff
-- 背景色：#f8f9fa
-- 文字颜色：#343a40
-- 成功状态：#28a745
-- 失败状态：#dc3545
+<div align="center">
+  <table>
+    <tr>
+      <td align="center" width="50%">
+        <img src="./assets/project-1.png" alt="Dashboard" width="100%"><br>
+        <b>Dashboard</b>
+      </td>
+      <td align="center" width="50%">
+        <img src="./assets/project-2.png" alt="Candidate Management" width="100%"><br>
+        <b>Candidate Management</b>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" colspan="2">
+        <img src="./assets/project-3.png" alt="Interview Schedule" width="80%"><br>
+        <b>Interview Schedule</b>
+      </td>
+    </tr>
+  </table>
+</div>
 
-#组件风格
-✅ **使用 Tailwind CSS 进行组件化**  
- ✅ **按钮 & 输入框使用统一的圆角（rounded-lg）**  
- ✅ **响应式布局（支持 PC & 移动端）**
+## 🛠️ Tech Stack
 
-### 数据库设计
+### Frontend
+- **Framework**: React
+- **Build Tool**: Vite
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Data Visualization**: ECharts
 
-**数据表结构**
+### Backend
+- **Framework**: NestJS
+- **Database**: PostgreSQL
+- **BaaS**: Supabase
+- **Vector Search**: pgvector
 
-- 候选人表（candidates）
+## 🎨 UI Design Guidelines
 
-```
-CREATE TABLE candidates (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255),
-    email VARCHAR(255) UNIQUE,
-    experience INT,
-    skills TEXT[],
-    created_at TIMESTAMP DEFAULT NOW()
-);
+### Color Scheme
+- **Primary**: #007bff (buttons, key information)
+- **Background**: #f8f9fa
+- **Text**: #343a40
+- **Success**: #28a745
+- **Error**: #dc3545
 
-```
+### Component Style
+- **Componentization**: Tailwind CSS with reusable components
+- **UI Elements**: Consistent rounded corners (rounded-lg)
+- **Layout**: Responsive design (supports desktop and mobile)
 
-- 简历表（resumes）
+## 🔌 API Design
 
-```
-CREATE TABLE resumes (
-    id SERIAL PRIMARY KEY,
-    candidate_id INT REFERENCES candidates(id) ON DELETE CASCADE,
-    embedding VECTOR(1536),  -- AI 语义搜索向量
-    created_at TIMESTAMP DEFAULT NOW()
-);
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | /api/candidates | Get candidate list |
+| POST | /api/candidates | Add candidate |
+| GET | /api/candidates/:id | Get candidate details |
+| POST | /api/resumes/upload | Upload resume |
+| POST | /api/interviews/schedule | Schedule interview |
+| POST | /api/match | Calculate matching degree |
 
-```
-
-- 面试安排表（interviews）
-
-```
-CREATE TABLE resumes (
-    id SERIAL PRIMARY KEY,
-    candidate_id INT REFERENCES candidates(id) ON DELETE CASCADE,
-    embedding VECTOR(1536),  -- AI 语义搜索向量
-    created_at TIMESTAMP DEFAULT NOW()
-);
-
-```
-
-### API 设计
-
-- GET - /api/candidates - 获取候选人列表
-- POST - /api/candidates - 添加候选人
-- GET - /api/candidates/:id - 获取候选人详情
-- POST - /api/resumes/upload - 上传简历
-- POST - /api/interviews/schedule - 安排面试
-- POST - /api/match - 匹配度计算
-
-## 项目结构
+## 📁 Project Structure
 
     recruitpro/
     ├── src/
-    │ ├── components/ # 可复用组件
-    │ ├── types/ # TypeScript 类型定义
-    │ ├── App.tsx # 主应用组件
-    │ ├── main.tsx # 应用入口
-    │ └── index.css # 全局样式
-    ├── public/ # 静态资源
-    ├── package.json # 项目依赖和脚本
-    ├── vite.config.ts # Vite 配置
-    ├── tailwind.config.js # Tailwind CSS 配置
-    └── postcss.config.js # PostCSS 配置
+    │ ├── components/ # Reusable components
+    │ ├── types/ # TypeScript type definitions
+    │ ├── App.tsx # Main application component
+    │ ├── main.tsx # Application entry point
+    │ └── index.css # Global styles
+    ├── public/ # Static assets
+    ├── package.json # Project dependencies and scripts
+    ├── vite.config.ts # Vite configuration
+    ├── tailwind.config.js # Tailwind CSS configuration
+    └── postcss.config.js # PostCSS configuration
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📝 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
