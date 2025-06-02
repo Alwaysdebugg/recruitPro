@@ -18,8 +18,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import { getPresignedUrl, uploadFile } from "../../api/s3/index"
 import { useUser } from "../../contexts/userContext"
-import ResumeHistory from "../../components/Resume/ResumeHistory";
-import { ResumeRecord } from "../../api/resumeUpload/resumeService";
+import { analyzeResume } from "../../api/resumeUpload/resumeService";
 
 // 样式组件
 const DropzoneContainer = styled(Box)(({ theme }) => ({
@@ -61,6 +60,16 @@ interface PresignedUrlResponse {
   fileKey: string;
 }
 
+interface ResumeAnalysisResponse {
+  matchScore: number;
+  skillsMatch: number;
+  experienceMatch: boolean;
+  keywordMatches: number;
+  missingSkills: number;
+  recommendations: string[];
+  status: 'success' | 'failed';
+}
+
 const ResumeUploadDrawer = ({
   isOpen,
   onClose,
@@ -71,7 +80,8 @@ const ResumeUploadDrawer = ({
   const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
   const { user } = useUser();
   const [tabValue, setTabValue] = useState(0);
-  const [refreshHistory, setRefreshHistory] = useState(0);
+  // const [refreshHistory, setRefreshHistory] = useState(0);
+  const [analysisResult, setAnalysisResult] = useState<ResumeAnalysisResponse | null>(null);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const newFiles = acceptedFiles.map(file => Object.assign(file, {
@@ -128,8 +138,7 @@ const ResumeUploadDrawer = ({
         onUpload(resumeUrls[0]);
         setUploadSuccess("Upload Success");
         setFiles([]);
-        setRefreshHistory(prev => prev + 1); // 触发历史记录刷新
-        setTabValue(1); // 切换到历史记录选项卡
+        setTabValue(1); // 切换到分析选项卡
       }
     } catch (err) {
       console.log('err', err);
@@ -159,10 +168,32 @@ const ResumeUploadDrawer = ({
     setTabValue(newValue);
   };
 
-  const handleSelectResume = (resume: ResumeRecord) => {
-    onUpload(resume.fileKey);
-    onClose();
-  };
+  // 简历分析请求
+  const handleAnalyzeResume = async () => {
+    try {
+      const params = {
+        candidateId: 12,
+        jobRequirements: ['JavaScript', 'React', 'Node.js', 'TypeScript'],
+        requiredSkills: ['JavaScript', 'React'],
+        experienceLevel: 3,
+        jobTitle: '前端开发工程师',
+        jobDescription: '负责公司前端项目的开发和维护'
+      }
+      console.log("params", params);
+      const result = await analyzeResume(params);
+      console.log("analysisResult", result);
+      setAnalysisResult(result);
+    } catch (error) {
+      console.error("Error analyzing resume:", error);
+    }
+  }
+
+  useEffect(() => {
+    if(tabValue === 1) {
+      handleAnalyzeResume();
+    }
+  }, [tabValue]);
+
 
   // 组件卸载时清理预览URL
   useEffect(() => {
@@ -181,60 +212,83 @@ const ResumeUploadDrawer = ({
       open={isOpen}
       onClose={onClose}
       PaperProps={{
-        sx: { 
+        sx: {
           width: {
             xs: "100%",
             sm: 400,
           },
           p: 0,
-          display: 'flex',
-          flexDirection: 'column'
-        }
+          display: "flex",
+          flexDirection: "column",
+        },
       }}
     >
-      <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+      <Box sx={{ p: 2, borderBottom: 1, borderColor: "divider" }}>
         <Typography variant="h6" component="h2">
-          Resume Management
+          Resume
         </Typography>
       </Box>
-      
-      <Tabs value={tabValue} onChange={handleTabChange} aria-label="resume tabs">
-        <Tab label="Upload New" />
-        <Tab label="History" />
+
+      <Tabs
+        value={tabValue}
+        onChange={handleTabChange}
+        aria-label="resume tabs"
+      >
+        <Tab label="Upload" />
+        <Tab label="Analysis" />
       </Tabs>
-      
-      <Box sx={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+
+      <Box
+        sx={{
+          flex: 1,
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
         {tabValue === 0 ? (
-          <Box sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
+          <Box
+            sx={{
+              p: 2,
+              height: "100%",
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+            }}
+          >
             <DropzoneContainer {...getRootProps()}>
               <input {...getInputProps()} />
-              <CloudUploadIcon sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
+              <CloudUploadIcon
+                sx={{ fontSize: 48, color: "primary.main", mb: 2 }}
+              />
               <Typography variant="body1" gutterBottom>
                 {isDragActive
-                  ? 'Drop the files here...'
-                  : 'Drag & drop resume files here, or click to select files'}
+                  ? "Drop the files here..."
+                  : "Drag & drop resume files here, or click to select files"}
               </Typography>
               <Typography variant="body2" color="textSecondary">
                 Supported formats: PDF, DOC, DOCX (Max 5MB)
               </Typography>
             </DropzoneContainer>
 
-            <Box sx={{ flex: 1, overflowY: 'auto', my: 2 }}>
+            <Box sx={{ flex: 1, overflowY: "auto" }}>
               {files.map((file) => (
                 <FilePreview key={file.name}>
                   <InsertDriveFileIcon sx={{ mr: 2 }} />
                   <Box sx={{ flexGrow: 1 }}>
-                    <Typography variant="body2" noWrap>{file.name}</Typography>
+                    <Typography variant="body2" noWrap>
+                      {file.name}
+                    </Typography>
                     {file.progress !== undefined && file.progress < 100 && (
-                      <LinearProgress 
-                        variant="determinate" 
-                        value={file.progress} 
+                      <LinearProgress
+                        variant="determinate"
+                        value={file.progress}
                         sx={{ mt: 1 }}
                       />
                     )}
                   </Box>
-                  <IconButton 
-                    size="small" 
+                  <IconButton
+                    size="small"
                     onClick={() => handleRemoveFile(file.name)}
                     aria-label="remove file"
                   >
@@ -255,7 +309,7 @@ const ResumeUploadDrawer = ({
               </Alert>
             )}
 
-            <Box sx={{ display: 'flex', gap: 2, mt: 'auto' }}>
+            <Box sx={{ display: "flex", gap: 2, mt: "auto" }}>
               <Button
                 variant="contained"
                 onClick={handleUpload}
@@ -271,11 +325,32 @@ const ResumeUploadDrawer = ({
             </Box>
           </Box>
         ) : (
-          <Box sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <ResumeHistory 
-              onSelect={handleSelectResume}
-              refreshTrigger={refreshHistory}
-            />
+          <Box
+            sx={{
+              p: 2,
+              height: "100%",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <Typography variant="body2" color="textSecondary">
+              Match Score: {analysisResult?.matchScore}
+            </Typography>
+            <Typography variant="body2" color="textSecondary">
+              Skills Match: {analysisResult?.skillsMatch}
+            </Typography>
+            <Typography variant="body2" color="textSecondary">
+              Missing Skills: {analysisResult?.missingSkills}
+            </Typography>
+            <Typography variant="body2" color="textSecondary">
+              Keyword Matches: {analysisResult?.keywordMatches}
+            </Typography>
+            <Typography variant="body2" color="textSecondary">
+              Experience Match: {analysisResult?.experienceMatch}
+            </Typography>
+            <Typography variant="body2" color="textSecondary">
+              Recommendations: {analysisResult?.recommendations}
+            </Typography>
           </Box>
         )}
       </Box>

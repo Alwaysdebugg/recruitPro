@@ -68,12 +68,6 @@ RecruitPro helps HR teams streamline their recruitment workflow with powerful fe
 - **Styling**: Tailwind CSS
 - **Data Visualization**: ECharts
 
-### Backend
-- **Framework**: NestJS
-- **Database**: PostgreSQL
-- **BaaS**: Supabase
-- **Vector Search**: pgvector
-
 ## 🎨 UI Design Guidelines
 
 ### Color Scheme
