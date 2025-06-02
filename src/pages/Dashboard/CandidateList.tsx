@@ -7,7 +7,6 @@ import { addCandidate, editCandidate, getCandidateList, getCandidateNoteList, up
 import EditNoteOutlinedIcon from '@mui/icons-material/EditNoteOutlined';
 import NoteAddOutlinedIcon from '@mui/icons-material/NoteAddOutlined';
 import OpenForm from './openForm';
-import AddIcon from '@mui/icons-material/Add';
 import { Tab, Tabs, Input } from '@mui/material';
 import AddForm from './addForm';
 import NoteDrawer from '../../components/NoteDrawer';
@@ -188,9 +187,9 @@ const CandidateList: React.FC = () => {
           <h2 className="text-2xl font-bold text-gray-900">Candidates</h2>
           <button
             onClick={() => setIsAddDrawerOpen(true)}
-            className="h-6 w-6 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+            className="h-7 w-7 bg-indigo-600 text-white rounded-full hover:bg-indigo-700"
           >
-            <AddIcon />
+            <div className="text-lg">+</div>
           </button>
 
           {/* 搜索框 */}
@@ -198,7 +197,7 @@ const CandidateList: React.FC = () => {
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
             <Input
               type="search"
-              placeholder="Search Candidate"
+              placeholder="Search"
               className="pl-8"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
